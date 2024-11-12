@@ -33,13 +33,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define FLAG_X 55
-#define FLAG_Y 123
-#define FLAG_W 130
-#define FLAG_H 74
-
-#define VERTICAL_DESLOC 43
-#define HORIZONTAL_DESLOC 24
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,14 +44,22 @@
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
+typedef struct ret
+{
+	uint16_t x;
+	uint16_t y;
+	uint16_t w;
+	uint16_t h;
+	uint16_t cor;
+}ret;
 
 typedef struct flag
 {
-	uint8_t vertical;
-	uint16_t cor[3];
+	ret first;
+	ret second;
+	ret third;
 }flag;
 
-int i = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,6 +67,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
+void DrawRectangle(ret*);
 void DrawFlag(flag*);
 /* USER CODE END PFP */
 
@@ -114,24 +116,65 @@ int main(void)
  flag bandeira[3];
 
 //Alemanha - 1
- bandeira[0].vertical = 0;
- bandeira[0].cor[0] = BLACK;
- bandeira[0].cor[1] = RED;
- bandeira[0].cor[2] = YELLOW;
+
+bandeira[0].first.cor = BLACK;
+ bandeira[0].first.x = 70;
+ bandeira[0].first.y = 110;
+ bandeira[0].first.w = 100;
+ bandeira[0].first.h = 60;
+
+bandeira[0].second.cor = RED;
+ bandeira[0].second.x = 70;
+ bandeira[0].second.y = 130;
+ bandeira[0].second.w = 100;
+ bandeira[0].second.h = 40;
+
+bandeira[0].third.cor = YELLOW;
+ bandeira[0].third.x = 70;
+ bandeira[0].third.y = 150;
+ bandeira[0].third.w = 100;
+ bandeira[0].third.h = 20;
 
 //Russia - 2
 
- bandeira[1].vertical = 0;
- bandeira[1].cor[0] = WHITE;
- bandeira[1].cor[1] = BLUE;
- bandeira[1].cor[2] = RED;
+bandeira[1].first.cor = WHITE;
+ bandeira[1].first.x = 70;
+ bandeira[1].first.y = 110;
+ bandeira[1].first.w = 100;
+ bandeira[1].first.h = 60;
+
+ bandeira[1].second.cor = BLUE;
+  bandeira[1].second.x = 70;
+  bandeira[1].second.y = 130;
+  bandeira[1].second.w = 100;
+  bandeira[1].second.h = 40;
+
+ bandeira[1].third.cor = RED;
+  bandeira[1].third.x = 70;
+  bandeira[1].third.y = 150;
+  bandeira[1].third.w = 100;
+  bandeira[1].third.h = 20;
 
 //Italia - 3
 
- bandeira[2].vertical = 1;
- bandeira[2].cor[0] = GREEN;
- bandeira[2].cor[1] = WHITE;
- bandeira[2].cor[2] = RED;
+ bandeira[2].first.cor = RED;
+  bandeira[2].first.x = 70;
+  bandeira[2].first.y = 110;
+  bandeira[2].first.w = 100;
+  bandeira[2].first.h = 60;
+
+ bandeira[2].second.cor = WHITE;
+  bandeira[2].second.x = 70;
+  bandeira[2].second.y = 110;
+  bandeira[2].second.w = 67;
+  bandeira[2].second.h = 60;
+
+ bandeira[2].third.cor = GREEN;
+  bandeira[2].third.x = 70;
+  bandeira[2].third.y = 110;
+  bandeira[2].third.w = 33;
+  bandeira[2].third.h = 60;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,14 +184,8 @@ int main(void)
   while (1)
   {
 	  //DrawRectangle(&r1);
-	  DrawFlag(&bandeira[0]);
-	  HAL_Delay(1000);
-
 	  DrawFlag(&bandeira[1]);
-	  HAL_Delay(1000);
-
-	  DrawFlag(&bandeira[2]);
-	  HAL_Delay(1000);
+	  HAL_Delay(3000);
 
     /* USER CODE END WHILE */
 
@@ -284,22 +321,19 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void DrawRectangle(ret* rect)
+{
+#ifdef ST7789
+	ST7789_DrawFilledRectangle(rect->x, rect->y, rect->w, rect->h, rect->cor);
+#elif
+	ST7735_FillRectangle(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h, rect->cor);
+#endif
+}
 void DrawFlag(flag* flag)
 {
-	if (!flag->vertical) {
-		uint32_t currentY = FLAG_Y;
-		for (i = 0; i < 3; i++) {
-			ST7789_DrawFilledRectangle(FLAG_X, currentY, FLAG_W, HORIZONTAL_DESLOC, flag->cor[i]);
-			currentY += HORIZONTAL_DESLOC;
-		}
-	}
-	else {
-		uint32_t currentX = FLAG_X;
-		for (i = 0; i < 3; i++) {
-			ST7789_DrawFilledRectangle(currentX, FLAG_Y, VERTICAL_DESLOC, FLAG_H, flag->cor[i]);
-			currentX += VERTICAL_DESLOC;
-		}
-	}
+	DrawRectangle(&flag->first);
+	DrawRectangle(&flag->second);
+	DrawRectangle(&flag->third);
 }
 /* USER CODE END 4 */
 
