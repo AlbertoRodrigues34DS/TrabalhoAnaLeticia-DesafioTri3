@@ -58,7 +58,7 @@ typedef struct flag
 	uint16_t cor[3];
 }flag;
 
-int i = 0;
+uint8_t i = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -287,14 +287,14 @@ static void MX_GPIO_Init(void)
 void DrawFlag(flag* flag)
 {
 	if (!flag->vertical) {
-		uint32_t currentY = FLAG_Y;
+		uint8_t currentY = FLAG_Y;
 		for (i = 0; i < 3; i++) {
 			ST7789_DrawFilledRectangle(FLAG_X, currentY, FLAG_W, HORIZONTAL_DESLOC, flag->cor[i]);
 			currentY += HORIZONTAL_DESLOC;
 		}
 	}
 	else {
-		uint32_t currentX = FLAG_X;
+		uint8_t currentX = FLAG_X;
 		for (i = 0; i < 3; i++) {
 			ST7789_DrawFilledRectangle(currentX, FLAG_Y, VERTICAL_DESLOC, FLAG_H, flag->cor[i]);
 			currentX += VERTICAL_DESLOC;
