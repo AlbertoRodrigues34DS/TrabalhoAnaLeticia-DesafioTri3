@@ -294,6 +294,7 @@ void SetFlag() {
 	while (1) {
 	if (buffer[0] > '0' && buffer[0] < '4') {
     DrawFlag(&bandeira[ buffer[0]-'0'+ 1 ]);
+    memset (buffer, '\0', 32);
     return;
 	}
 	else if (buffer[0] != 0) {
