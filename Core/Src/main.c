@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "ST7789\ST7789.h"
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,6 +41,7 @@
 
 #define VERTICAL_DESLOC 43
 #define HORIZONTAL_DESLOC 24
+#define ST7789
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,11 +54,10 @@ SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
 
-typedef struct flag
-{
-	uint8_t vertical;
-	uint16_t cor[3];
-}flag;
+typedef struct __attribute__((aligned(4))) {
+    uint8_t vertical;
+    uint16_t cor[3];
+} flag;
 
 uint8_t i = 0;
 /* USER CODE END PV */
@@ -66,7 +67,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
-void DrawFlag(flag*);
+void DrawFlag(const flag*);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -111,27 +112,11 @@ int main(void)
  ST7735_Init();
 #endif
 
- flag bandeira[3];
-
-//Alemanha - 1
- bandeira[0].vertical = 0;
- bandeira[0].cor[0] = BLACK;
- bandeira[0].cor[1] = RED;
- bandeira[0].cor[2] = YELLOW;
-
-//Russia - 2
-
- bandeira[1].vertical = 0;
- bandeira[1].cor[0] = WHITE;
- bandeira[1].cor[1] = BLUE;
- bandeira[1].cor[2] = RED;
-
-//Italia - 3
-
- bandeira[2].vertical = 1;
- bandeira[2].cor[0] = GREEN;
- bandeira[2].cor[1] = WHITE;
- bandeira[2].cor[2] = RED;
+flag const bandeira[3] = {
+     {0, {BLACK, RED, YELLOW}},   // Alemanha
+     {0, {WHITE, BLUE, RED}},     // Russia
+     {1, {GREEN, WHITE, RED}}     // Italia
+ };
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -284,7 +269,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void DrawFlag(flag* flag)
+void DrawFlag(const flag* flag)
 {
 	if (!flag->vertical) {
 		uint8_t currentY = FLAG_Y;
