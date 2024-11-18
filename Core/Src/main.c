@@ -24,12 +24,16 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "ST7789\ST7789.h"
-#include <stdlib.h>
+#include "string.h"
+//#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct __attribute__((aligned(4))) {
+    uint8_t vertical;
+    uint16_t cor[3];
+} flag;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -41,7 +45,6 @@
 
 #define VERTICAL_DESLOC 43
 #define HORIZONTAL_DESLOC 24
-#define ST7789
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -53,12 +56,12 @@
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
-
-typedef struct __attribute__((aligned(4))) {
-    uint8_t vertical;
-    uint16_t cor[3];
-} flag;
-
+flag const bandeira[3] = {
+     {0, {BLACK, RED, YELLOW}},   // Alemanha
+     {0, {WHITE, BLUE, RED}},     // Russia
+     {1, {GREEN, WHITE, RED}}     // Italia
+ };
+uint8_t buffer[32];
 uint8_t i = 0;
 /* USER CODE END PV */
 
@@ -68,6 +71,7 @@ static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 void DrawFlag(const flag*);
+uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -105,6 +109,7 @@ int main(void)
   MX_SPI1_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
+
 #ifdef ST7789
  ST7789_Init();
  ST7789_Fill_Color(GRAY);
@@ -112,11 +117,6 @@ int main(void)
  ST7735_Init();
 #endif
 
-flag const bandeira[3] = {
-     {0, {BLACK, RED, YELLOW}},   // Alemanha
-     {0, {WHITE, BLUE, RED}},     // Russia
-     {1, {GREEN, WHITE, RED}}     // Italia
- };
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -125,7 +125,10 @@ flag const bandeira[3] = {
 
   while (1)
   {
-	  //DrawRectangle(&r1);
+	  CDC_Transmit_FS("Insira o Codigo da bandeira:\n1:Alemanha\n2:Russia\n3:Italia\n", 58);
+      SetFlag();
+
+	  /*
 	  DrawFlag(&bandeira[0]);
 	  HAL_Delay(1000);
 
@@ -134,6 +137,7 @@ flag const bandeira[3] = {
 
 	  DrawFlag(&bandeira[2]);
 	  HAL_Delay(1000);
+	  */
 
     /* USER CODE END WHILE */
 
@@ -285,6 +289,18 @@ void DrawFlag(const flag* flag)
 			currentX += VERTICAL_DESLOC;
 		}
 	}
+}
+void SetFlag() {
+	while (1) {
+	if (buffer[0] > '0' && buffer[0] < '4') {
+    DrawFlag(&bandeira[ buffer[0]-'0'+ 1 ]);
+    return;
+	}
+	else if (buffer[0] != 0) {
+	CDC_Transmit_FS("Invalido\n",9);
+	memset (buffer, '\0', 32);
+	}
+  }
 }
 /* USER CODE END 4 */
 
