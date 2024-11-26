@@ -291,7 +291,7 @@ void SetFlag() {
     memset (buffer, '\0', 32);
     return;
         }
-        else if (buffer[0] < 0 || buffer[0] >= 5 ) {
+        else if (buffer[0] < '0' || buffer[0] >= '5' ) {
         CDC_Transmit_FS("Invalido\n",9);
         memset (buffer, '\0', 32);
         }
