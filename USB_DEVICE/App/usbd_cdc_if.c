@@ -23,7 +23,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "string.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +50,7 @@
   */
 
 /* USER CODE BEGIN PRIVATE_TYPES */
-
+extern uint8_t buffer[32];
 /* USER CODE END PRIVATE_TYPES */
 
 /**
@@ -260,9 +260,21 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  CDC_Transmit_FS(Buf, *Len);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  uint8_t len = (uint8_t)*Len;
+
+  if (*Len > 31) {
+	  CDC_Transmit_FS("Numero de Caracteres excede Maximo Permitido(30)\n",49);
+	  memset(Buf, '\0', len);
+	  return (USBD_OK);
+  }
+
+  memset (buffer, '\0', 32);  // clear the buffer
+  memcpy(buffer, Buf, len);  // copy the data to the buffer
+  CDC_Transmit_FS(buffer, strlen(buffer));
+  memset(Buf, '\0', len);   // clear the Buf also
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }
