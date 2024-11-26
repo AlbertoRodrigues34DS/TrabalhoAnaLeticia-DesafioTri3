@@ -25,7 +25,6 @@
 /* USER CODE BEGIN Includes */
 #include "ST7789\ST7789.h"
 #include "string.h"
-//#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,6 +37,10 @@ typedef struct __attribute__((aligned(4))) {
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TEXTO_BANDEIRA  CDC_Transmit_FS("Insira o Codigo da bandeira:\n1:Alemanha\n2:Russia\n3:Italia\n", 58)
+#define TEXTO_NOME CDC_Transmit_FS("Insira o seu nome (sem caracter especial)\n", 42)
+#define TEXTO_AGRADECIMENTO CDC_Transmit_FS("Obrigado por usar nosso software\n", 33)
+#define PAUSA1S HAL_Delay(1000)
 #define FLAG_X 55
 #define FLAG_Y 123
 #define FLAG_W 130
@@ -71,6 +74,9 @@ static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 void DrawFlag(const flag*);
+void SetFlag(void);
+void SetName(void);
+void Read(void);
 uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 /* USER CODE END PFP */
 
@@ -125,19 +131,7 @@ int main(void)
 
   while (1)
   {
-	  CDC_Transmit_FS("Insira o Codigo da bandeira:\n1:Alemanha\n2:Russia\n3:Italia\n", 58);
-      SetFlag();
-
-	  /*
-	  DrawFlag(&bandeira[0]);
-	  HAL_Delay(1000);
-
-	  DrawFlag(&bandeira[1]);
-	  HAL_Delay(1000);
-
-	  DrawFlag(&bandeira[2]);
-	  HAL_Delay(1000);
-	  */
+	  Read();
 
     /* USER CODE END WHILE */
 
@@ -275,33 +269,61 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void DrawFlag(const flag* flag)
 {
-	if (!flag->vertical) {
-		uint8_t currentY = FLAG_Y;
-		for (i = 0; i < 3; i++) {
-			ST7789_DrawFilledRectangle(FLAG_X, currentY, FLAG_W, HORIZONTAL_DESLOC, flag->cor[i]);
-			currentY += HORIZONTAL_DESLOC;
-		}
-	}
-	else {
-		uint8_t currentX = FLAG_X;
-		for (i = 0; i < 3; i++) {
-			ST7789_DrawFilledRectangle(currentX, FLAG_Y, VERTICAL_DESLOC, FLAG_H, flag->cor[i]);
-			currentX += VERTICAL_DESLOC;
-		}
-	}
+        if (!flag->vertical) {
+                uint8_t currentY = FLAG_Y;
+                for (i = 0; i < 3; i++) {
+                        ST7789_DrawFilledRectangle(FLAG_X, currentY, FLAG_W, HORIZONTAL_DESLOC, flag->cor[i]);
+                        currentY += HORIZONTAL_DESLOC;
+                }
+        }
+        else {
+                uint8_t currentX = FLAG_X;
+                for (i = 0; i < 3; i++) {
+                        ST7789_DrawFilledRectangle(currentX, FLAG_Y, VERTICAL_DESLOC, FLAG_H, flag->cor[i]);
+                        currentX += VERTICAL_DESLOC;
+                }
+        }
 }
 void SetFlag() {
-	while (1) {
-	if (buffer[0] > '0' && buffer[0] < '4') {
-    DrawFlag(&bandeira[ buffer[0]-'0'+ 1 ]);
+        while (1) {
+        if (buffer[0] > '0' && buffer[0] < '4') {
+    DrawFlag(&bandeira[ buffer[0]-'0'- 1 ]);
     memset (buffer, '\0', 32);
     return;
-	}
-	else if (buffer[0] != 0) {
-	CDC_Transmit_FS("Invalido\n",9);
-	memset (buffer, '\0', 32);
-	}
+        }
+        else if (buffer[0] < '0' || buffer[0] >= '5' ) {
+        CDC_Transmit_FS("Invalido\n",9);
+        memset (buffer, '\0', 32);
+        }
   }
+}
+void SetName() {
+        while (1) {
+        if (buffer[0] != 0) {
+        ST7789_WriteString(30,58, &buffer, Font_11x18, WHITE, BLACK);
+        CDC_Transmit_FS("OK\n",3);
+        memset(buffer, '\0', 32);
+        break;
+        }
+        }
+}
+void Read(void)
+{
+
+
+	  TEXTO_BANDEIRA;
+	    SetFlag();
+	     PAUSA1S;
+
+	  TEXTO_NOME;
+	  	SetName();
+	  	 PAUSA1S;
+
+	  TEXTO_AGRADECIMENTO;
+	  HAL_Delay(5000);
+	  ST7789_Fill_Color(GRAY);
+
+
 }
 /* USER CODE END 4 */
 
